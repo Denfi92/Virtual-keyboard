@@ -4,8 +4,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin');
 const TerserWebpackPlugin = require('terser-webpack-plugin');
-// const CopyWebpackPlugin = require('copy-webpack-plugin')
-// const loader = require('sass-loader');
 
 const isDev = process.env.NODE_ENV === 'development';
 const isProd = !isDev;
@@ -48,14 +46,6 @@ module.exports = {
       inject: 'body',
     }),
     new CleanWebpackPlugin(),
-    // new CopyWebpackPlugin({
-    //   patterns: [
-    //     {
-    //       from: path.resolve(__dirname, './src/assets/favicon.ico'),
-    //       to: path.resolve(__dirname, 'virtual-keyboard/assets/icons')
-    //     },
-    //   ]
-    // }),
     new MiniCssExtractPlugin({
       filename: filename('css'),
     }),
@@ -81,10 +71,6 @@ module.exports = {
             ],
           },
         },
-      },
-      {
-        test: /\.(png|jpg|svg)$/,
-        type: 'asset/resource',
       },
     ],
   },
