@@ -1,7 +1,5 @@
-let num = 0
+import language from './script/language/language';
+import create from './script/create';
 
-
-
-function addFas() {
-  let sadf = '123';
-}
+console.log(language);
+console.log(create);

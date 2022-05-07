@@ -1,52 +1,39 @@
-const path = require("path");
-const {CleanWebpackPlugin} = require('clean-webpack-plugin');
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const CopyWebpackPlugin = require("copy-webpack-plugin")
-const MiniCssExtractPlugin = require("mini-css-extract-plugin")
-const OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin')
-const TerserWebpackPlugin = require("terser-webpack-plugin");
-const loader = require("sass-loader");
+const path = require('path');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin');
+const TerserWebpackPlugin = require('terser-webpack-plugin');
+// const CopyWebpackPlugin = require('copy-webpack-plugin')
+// const loader = require('sass-loader');
 
+const isDev = process.env.NODE_ENV === 'development';
+const isProd = !isDev;
 
+const filename = (ext) => (isDev ? `[name].${ext}` : `[name].[hash].${ext}`);
 
-const isDev = process.env.NODE_ENV === 'development'
-const isProd = !isDev
-
-const filename = ext => isDev ? `[name].${ext}` : `[name].[hash].${ext}`
-
-const cssLoaders = extra => {
+const cssLoaders = (extra) => {
   const loaders = [
-    isDev ? "style-loader" : MiniCssExtractPlugin.loader,
-    "css-loader",
-  ]
-  if(extra) {
-    loaders.push(extra)
+    isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
+    'css-loader',
+  ];
+  if (extra) {
+    loaders.push(extra);
   }
-  return loaders
-}
+  return loaders;
+};
 
 const optimization = () => {
-  const config = {}
+  const config = {};
 
   if (isProd) {
     config.minimizer = [
       new OptimizeCssAssetsWebpackPlugin(),
-      new TerserWebpackPlugin()
-    ]
+      new TerserWebpackPlugin(),
+    ];
   }
-  return config
-}
-
-const jsLoaders = () => {
-  const loaders = [{
-    loader: 'babel-loader'
-  }]
-
-  if (isDev) {
-    loaders.push('eslint-loader')
-  }
-  return loaders
-}
+  return config;
+};
 
 module.exports = {
   entry: ['@babel/polyfill', './src/index.js'],
@@ -70,18 +57,18 @@ module.exports = {
     //   ]
     // }),
     new MiniCssExtractPlugin({
-      filename: filename('css')
-    })
+      filename: filename('css'),
+    }),
   ],
   module: {
     rules: [
       {
         test: /\.css$/,
-        use: cssLoaders()
+        use: cssLoaders(),
       },
       {
         test: /\.s[ac]ss$/,
-        use: cssLoaders('sass-loader')
+        use: cssLoaders('sass-loader'),
       },
       {
         test: /\.js$/,
@@ -90,19 +77,15 @@ module.exports = {
           loader: 'babel-loader',
           options: {
             presets: [
-              '@babel/preset-env'
-            ]
-          }
-        }
+              '@babel/preset-env',
+            ],
+          },
+        },
       },
       {
         test: /\.(png|jpg|svg)$/,
-        type: 'asset/resource'
+        type: 'asset/resource',
       },
-      // {
-      //   test: /\.woff$/,
-      //   type: 'asset/resource'
-      // },
-    ]
-  }
-}
+    ],
+  },
+};
