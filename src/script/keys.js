@@ -13,6 +13,7 @@ export default class Key {
     if (this.isFnKey) {
       this.div.classList.add('fn-key');
     }
+    this.div.dataset.code = this.code;
     this.div.dataset.key = this.keycode;
     if (shift && shift.match(/[^a-zA-Zа-яА-ЯёЁ0-9]/)) {
       this.sup = create('div', 'sup', this.div, shift);
