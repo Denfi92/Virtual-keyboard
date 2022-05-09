@@ -9,16 +9,16 @@ export default class Key {
     this.code = code;
     this.keycode = keycode;
     this.div = create('div', 'keyboard-key');
-    if (shift && shift.match(/[^a-zA-Zа-яА-ЯёЁ0-9]/)) {
-      this.sub = create('div', 'sub', this.div, shift);
-    } else {
-      this.sub = create('div', 'sub', this.div, '');
-    }
-    this.letter = create('div', 'letter', this.div, small);
     this.isFnKey = Boolean(small.match(/Ctrl|↑|↓|→|←|Alt|Shift|Tab|Back|Del|Enter|Caps|Win/));
     if (this.isFnKey) {
-      this.letter.classList.add('fn-key');
-      this.letter.dataset.isFnKey = 'true';
+      this.div.classList.add('fn-key');
     }
+    this.div.dataset.key = this.keycode;
+    if (shift && shift.match(/[^a-zA-Zа-яА-ЯёЁ0-9]/)) {
+      this.sup = create('div', 'sup', this.div, shift);
+    } else {
+      this.sup = create('div', 'sup', this.div, '');
+    }
+    this.char = create('div', 'char', this.div, small);
   }
 }
