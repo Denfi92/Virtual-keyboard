@@ -16,13 +16,6 @@ const wrapper = document.querySelector('.wrapper');
 create('h1', 'title', wrapper, 'Virtual Keyboard');
 create('p', 'subtitle', wrapper, 'Windows Keyboard');
 
-function get(name, value = null) {
-  return JSON.parse(window.localStorage.getItem(name) || value);
-}
-
-function set(name, value) {
-  window.localStorage.setItem(name, JSON.stringify(value));
-}
 class Keyboard {
   constructor() {
     this.isCaps = false;
@@ -83,24 +76,26 @@ class Keyboard {
     if (type.match(/keydown|mousedown/)) {
       if (!type.match(/mouse/)) e.preventDefault();
       if (code.match(/Shift/)) this.shiftKey = true;
-      if (this.shiftKey) this.switchUpperCase(true);
+      if (this.shiftKey) this.switchCase(true);
       if (code.match(/Control|Alt|Caps/) && e.repeat) return;
       if (code.match(/Control/)) this.ctrKey = true;
       if (code.match(/Alt/)) this.altKey = true;
+      if (code.match(/Control/) && this.altKey) this.changeLang();
+      if (code.match(/Alt/) && this.ctrKey) this.changeLang();
       keyButton.div.classList.add('pressing');
       if (code.match(/Caps/) && !this.isCaps) {
         this.isCaps = true;
-        this.switchUpperCase(true);
+        this.switchCase(true);
       } else if (code.match(/Caps/) && this.isCaps) {
         this.isCaps = false;
-        this.switchUpperCase(false);
+        this.switchCase(false);
         keyButton.div.classList.remove('pressing');
       }
       this.keysPressed[keyButton.code] = keyButton;
     } else if (e.type.match(/keyup|mouseup/)) {
       if (code.match(/Shift/)) {
         this.shiftKey = false;
-        this.switchUpperCase(false);
+        this.switchCase(false);
       }
       if (code.match(/Control/)) this.ctrKey = false;
       if (code.match(/Alt/)) this.altKey = false;
@@ -108,7 +103,7 @@ class Keyboard {
     }
   };
 
-  switchUpperCase(isTrue) {
+  switchCase(isTrue) {
     if (isTrue) {
       this.keys.forEach((button) => {
         if (!button.isFnKey && this.isCaps && !this.shiftKey && !button.sup.innerHTML) {
@@ -137,7 +132,35 @@ class Keyboard {
       });
     }
   }
+
+  changeLang = () => {
+    const lang = Object.keys(language);
+    let langI = lang.indexOf(this.keyboard.dataset.language);
+    this.keyBase = langI + 1 < lang.length ? language[lang[langI += 1]]
+      : language[lang[langI -= langI]];
+    this.keyboard.dataset.language = lang[langI];
+    function set() {
+      window.localStorage.setItem('Lang', JSON.stringify(lang[langI]));
+    }
+    set();
+    this.keys.forEach((button) => {
+      const keyObj = this.keyBase.find((key) => key.code === button.code);
+      if (!keyObj) return;
+      button.shift = keyObj.shift;
+      button.small = keyObj.small;
+      if (keyObj.shift && keyObj.shift.match(/[^a-zA-Zа-яА-ЯёЁ0-9]/g)) {
+        button.sup.innerHTML = keyObj.shift;
+      } else {
+        button.sup.innerHTML = '';
+      }
+      button.char.innerHTML = keyObj.small;
+    });
+    if (this.isCaps) this.switchCase(true);
+  };
 }
 
+function get(name, value = null) {
+  return JSON.parse(window.localStorage.getItem(name) || value);
+}
 const lang = get('Lang', '"ru"');
 new Keyboard(keyboardKeys).draw(lang).createKeyboard();
