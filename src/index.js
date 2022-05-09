@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import './styles/scss.css';
 import language from './script/language/language';
 import create from './script/create';
@@ -27,6 +26,7 @@ function set(name, value) {
 class Keyboard {
   constructor() {
     this.isCaps = false;
+    this.keysPressed = {};
   }
 
   draw(langType) {
@@ -59,6 +59,83 @@ class Keyboard {
     document.addEventListener('keyup', this.keyPress);
     this.keyboard.onmousedown = this.mouseEvent;
     this.keyboard.onmouseup = this.mouseEvent;
+  }
+
+  mouseEvent = (e) => {
+    e.stopPropagation();
+    const key = e.target.closest('.keyboard-key');
+    if (e.type.match(/down/)) {
+      key.classList.add('pressing');
+    }
+    if (e.type.match(/up/)) {
+      key.classList.remove('pressing');
+    }
+    if (!key) return;
+    const { dataset: { code } } = key;
+    this.keyPress({ code, type: e.type });
+  };
+
+  keyPress = (e) => {
+    const { code, type } = e;
+    const keyButton = this.keys.find((elem) => elem.code === code);
+    this.textarea.focus();
+    if (!keyButton) return;
+    if (type.match(/keydown|mousedown/)) {
+      if (!type.match(/mouse/)) e.preventDefault();
+      if (code.match(/Shift/)) this.shiftKey = true;
+      if (this.shiftKey) this.switchUpperCase(true);
+      if (code.match(/Control|Alt|Caps/) && e.repeat) return;
+      if (code.match(/Control/)) this.ctrKey = true;
+      if (code.match(/Alt/)) this.altKey = true;
+      keyButton.div.classList.add('pressing');
+      if (code.match(/Caps/) && !this.isCaps) {
+        this.isCaps = true;
+        this.switchUpperCase(true);
+      } else if (code.match(/Caps/) && this.isCaps) {
+        this.isCaps = false;
+        this.switchUpperCase(false);
+        keyButton.div.classList.remove('pressing');
+      }
+      this.keysPressed[keyButton.code] = keyButton;
+    } else if (e.type.match(/keyup|mouseup/)) {
+      if (code.match(/Shift/)) {
+        this.shiftKey = false;
+        this.switchUpperCase(false);
+      }
+      if (code.match(/Control/)) this.ctrKey = false;
+      if (code.match(/Alt/)) this.altKey = false;
+      if (!code.match(/Caps/)) keyButton.div.classList.remove('pressing');
+    }
+  };
+
+  switchUpperCase(isTrue) {
+    if (isTrue) {
+      this.keys.forEach((button) => {
+        if (!button.isFnKey && this.isCaps && !this.shiftKey && !button.sup.innerHTML) {
+          button.char.innerHTML = button.shift;
+        } else if (!button.isFnKey && this.isCaps && this.shiftKey) {
+          button.char.innerHTML = button.small;
+        } else if (!button.isFnKey && !button.sup.innerHTML) {
+          button.char.innerHTML = button.shift;
+        }
+      });
+    } else {
+      this.keys.forEach((button) => {
+        if (button.sup.innerHTML && !button.isFnKey) {
+          if (!this.isCaps) {
+            button.char.innerHTML = button.small;
+          } else if (!this.isCaps) {
+            button.char.innerHTML = button.shift;
+          }
+        } else if (!button.isFnKey) {
+          if (this.isCaps) {
+            button.char.innerHTML = button.shift;
+          } else {
+            button.char.innerHTML = button.small;
+          }
+        }
+      });
+    }
   }
 }
 
